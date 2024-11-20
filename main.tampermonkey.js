@@ -63,6 +63,7 @@
             toggleDisplay('#jyd-video1');
         } else if (event.code === 'Digit2') {
             toggleDisplay('#jyd-video2');
+            $("#jyd-teacherVoice").click(); // 保持音频来自教师
         }
     });
     function toggleDisplay(selector) {
