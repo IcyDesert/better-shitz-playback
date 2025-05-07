@@ -5,76 +5,149 @@
 // @description  try to take over the world!
 // @author       IcyDesert
 // @match        http://219.223.238.14:88/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
+// @match        https://219-223-238-14-88-p.hitsz.edu.cn/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=238.14
-// @grant        none
+// @grant        GM_getValue
+// @grant        GM_setValue
 // ==/UserScript==
 
-(function() {
-    'use strict';
-    // ===========鼠标移动时显示进度条（是的，原本没有）=============
-    const $controlBar = $('.jyd-videoControlBar');
+const SAVE_INTERVAL_SECONDS = 10; // 实时保存进度的间隔时间（秒）
 
-    // 鼠标移动事件
-    $(document).on('mousemove', function() {
+(function () {
+    'use strict';
+    const $controlBar = $('.jyd-videoControlBar');
+    const fullScreenButton = document.getElementById('jyd-fullScreen');
+    const exitButton = document.getElementById('jyd-exitFullScreen');
+    const video1 = document.getElementById('jyd-video1');
+    const video2 = document.getElementById('jyd-video2');
+    const $teacherVoice = $("#jyd-teacherVoice")
+
+    let clickCount = 0; // 初始化计数器
+
+    // =========== 鼠标移动时显示进度条（是的，原本没有） =============
+    $(document).on('mousemove', function () {
         $controlBar.css('display', 'block');
     });
 
-    // =============空格键暂停、播放视频============
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'Space') { // 检测按下的是空格键
-            event.preventDefault(); // 防止默认空格滚动页面的行为
-
-            const video1 = document.getElementById('jyd-video1');
-            const video2 = document.getElementById('jyd-video2');
-            // 切换播放状态
+    document.addEventListener('keydown', function (event) {
+        // =========== 空格键控制播放/暂停 ==========
+        if (event.code === 'Space') {
+            event.preventDefault();
             if (video1.paused) {
                 video1.play();
-                video2.play(); // 确保 video2 暂停
+                video2.play();
             } else {
                 video1.pause();
                 video2.pause();
             }
         }
-    });
-    //=============f键缩小/放大视频，和b站一致===========
-    let clickCount = 0; // 初始化计数器
-    const fullScreenButton = document.getElementById('jyd-fullScreen');
-    // 监听键盘事件
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'KeyF') { // 检测按下的是 F 键
-            clickCount++; // 增加计数器
-            if (clickCount % 2 === 1) { // 奇数次按下
-                const fullScreenButton = document.getElementById('jyd-fullScreen');
-                if (fullScreenButton) {
-                    fullScreenButton.click(); // 第一次点击
-                }
-            } else { // 偶数次按下
-                const exitButton = document.getElementById('jyd-exitFullScreen');
-                if (exitButton) {
-                    exitButton.click(); // 点击 #jyd-container
-                }
-            }
+        // ============== F键控制全屏与否 =================
+        else if (event.code === 'KeyF') {
+            clickCount++;
+            const button = (clickCount % 2 === 1) ? fullScreenButton : exitButton;
+            if (button) button.click();
+        }
+        // ============ 1,2 键控制教师/课件视频显示 ===========
+        else if (event.code === 'Digit1') {
+            dbClick('#jyd-video1');
+        }
+        else if (event.code === 'Digit2') {
+            dbClick('#jyd-video2');
+            if ($teacherVoice.length) $teacherVoice.click();
         }
     });
-   //================按下1、2以全屏显示某个视频==================
-    // 监听键盘按下事件
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'Digit1') {
-            toggleDisplay('#jyd-video1');
-        } else if (event.code === 'Digit2') {
-            toggleDisplay('#jyd-video2');
-            $("#jyd-teacherVoice").click(); // 保持音频来自教师
+
+    // ================= 进度储存 =================
+    bindVideo(video1);
+    bindVideo(video2);
+}());
+
+function dbClick(selector) {
+    let element = document.querySelector(selector);
+    if (!element) {
+        console.error(`找不到元素: ${selector}`);
+        return;
+    }
+    // 双击事件
+    const event = new MouseEvent('dblclick', {
+        bubbles: true,
+        cancelable: true,
+    });
+    element.dispatchEvent(event);
+}
+
+function loadProgress() {
+    return GM_getValue(getKey(), 0);
+}
+
+function getKey() {
+    // 以路径查询参数 rpId 作为唯一标识符
+    const params = new URLSearchParams(location.search);
+    return params.get('rpId') + '_progress' || location.href + '_progress'; // 回退到完整URL
+}
+
+function saveProgress(progress) {
+    GM_setValue(getKey(), progress);
+}
+
+function bindVideo(video) {
+    if (!video) return;
+    let lastSaved = 0;
+
+    const savedProgress = loadProgress();
+
+    // ============ 恢复上次播放进度 =================
+    video.addEventListener('loadedmetadata', () => {
+        setTimeout(() => {
+            if (savedProgress > 0) simulateProgressBarDrag(savedProgress);
+        }, 500);
+    });
+
+    // ============ 间隔一段时间的进度保存 =================
+    video.addEventListener('timeupdate', () => {
+        if (video.currentTime - lastSaved > SAVE_INTERVAL_SECONDS) {
+            saveProgress(video.currentTime);
+            lastSaved = video.currentTime;
         }
     });
-    function toggleDisplay(selector) {
-        let element = document.querySelector(selector);
-        // 创建一个双击事件
-        const event = new MouseEvent('dblclick', {
+    // ============ 页面关闭时保存进度 =================
+    window.addEventListener('beforeunload', () => {
+        if (video.readyState === 4) {
+            saveProgress(video.currentTime);
+        }
+    });
+};
+
+function simulateProgressBarDrag(targetTime) {
+    // 由于回放平台不能直接设置 video.currentTime，所以模拟拖动进度条
+    try {
+        const processBar = document.getElementById("jyd-processBar");
+        if (!processBar)  return false;
+
+        const video1 = document.getElementById('jyd-video1');
+        if (!video1) return false;
+
+        const rect = processBar.getBoundingClientRect();
+        const duration = video1.duration || 1;
+        const percent = Math.min(Math.max(targetTime / duration, 0), 1);
+        const clickX = rect.left + (rect.width * percent);
+
+        const mousedownEvent = new MouseEvent('mousedown', {
             bubbles: true,
             cancelable: true,
-            view: window
+            clientX: clickX,
+            clientY: rect.top + (rect.height / 2)
         });
-        // 触发双击事件
-        element.dispatchEvent(event);
+        processBar.dispatchEvent(mousedownEvent);
+
+        setTimeout(() => {
+            document.dispatchEvent(new MouseEvent('mouseup', {
+                bubbles: true,
+                cancelable: true
+            }));
+        }, 50);
+        return true;
+    } catch (e) {
+        return false;
     }
-}());
+}
