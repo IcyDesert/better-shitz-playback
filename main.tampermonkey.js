@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         回放平台大整改
 // @namespace    http://tampermonkey.net/
-// @version      2024-10-18
+// @version      2025-05-08
 // @description  try to take over the world!
 // @author       IcyDesert
 // @match        http://219.223.238.14:88/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
@@ -58,8 +58,8 @@ const SAVE_INTERVAL_SECONDS = 10; // 实时保存进度的间隔时间（秒）
     });
 
     // ================= 进度储存 =================
-    bindVideo(video1);
-    bindVideo(video2);
+    videoProgressStorage(video1);
+    videoProgressStorage(video2);
 }());
 
 function dbClick(selector) {
@@ -81,7 +81,7 @@ function loadProgress() {
 }
 
 function getKey() {
-    // 以路径查询参数 rpId 作为唯一标识符
+    // 以路径查询参数 rpId 作为该视频唯一标识符
     const params = new URLSearchParams(location.search);
     return params.get('rpId') + '_progress' || location.href + '_progress'; // 回退到完整URL
 }
@@ -90,7 +90,7 @@ function saveProgress(progress) {
     GM_setValue(getKey(), progress);
 }
 
-function bindVideo(video) {
+function videoProgressStorage(video) {
     if (!video) return;
     let lastSaved = 0;
 
@@ -99,11 +99,11 @@ function bindVideo(video) {
     // ============ 恢复上次播放进度 =================
     video.addEventListener('loadedmetadata', () => {
         setTimeout(() => {
-            if (savedProgress > 0) simulateProgressBarDrag(savedProgress);
+            if (savedProgress > 0) recoverProgress(video, savedProgress);
         }, 500);
     });
 
-    // ============ 间隔一段时间的进度保存 =================
+    // ============ 间隔一段时间保存进度 =================
     video.addEventListener('timeupdate', () => {
         if (video.currentTime - lastSaved > SAVE_INTERVAL_SECONDS) {
             saveProgress(video.currentTime);
@@ -118,36 +118,8 @@ function bindVideo(video) {
     });
 };
 
-function simulateProgressBarDrag(targetTime) {
-    // 由于回放平台不能直接设置 video.currentTime，所以模拟拖动进度条
-    try {
-        const processBar = document.getElementById("jyd-processBar");
-        if (!processBar)  return false;
-
-        const video1 = document.getElementById('jyd-video1');
-        if (!video1) return false;
-
-        const rect = processBar.getBoundingClientRect();
-        const duration = video1.duration || 1;
-        const percent = Math.min(Math.max(targetTime / duration, 0), 1);
-        const clickX = rect.left + (rect.width * percent);
-
-        const mousedownEvent = new MouseEvent('mousedown', {
-            bubbles: true,
-            cancelable: true,
-            clientX: clickX,
-            clientY: rect.top + (rect.height / 2)
-        });
-        processBar.dispatchEvent(mousedownEvent);
-
-        setTimeout(() => {
-            document.dispatchEvent(new MouseEvent('mouseup', {
-                bubbles: true,
-                cancelable: true
-            }));
-        }, 50);
-        return true;
-    } catch (e) {
-        return false;
-    }
+function recoverProgress(video, targetTime) {
+    if (!video) return false;
+    video.currentTime = targetTime;
+    return true;
 }
