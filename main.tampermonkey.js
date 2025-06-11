@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         回放平台大整改
 // @namespace    http://tampermonkey.net/
-// @version      2025-05-08
+// @version      0.3.0
 // @description  try to take over the world!
 // @author       IcyDesert
 // @match        http://219.223.238.14:88/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
@@ -12,6 +12,7 @@
 // ==/UserScript==
 
 const SAVE_INTERVAL_SECONDS = 10; // 实时保存进度的间隔时间（秒）
+const SKIP_SECONDS = 6; // 快进/快退的秒数
 
 (function () {
     'use strict';
@@ -19,8 +20,8 @@ const SAVE_INTERVAL_SECONDS = 10; // 实时保存进度的间隔时间（秒）
     const fullScreenButton = document.getElementById('jyd-fullScreen');
     const exitButton = document.getElementById('jyd-exitFullScreen');
     const video1 = document.getElementById('jyd-video1');
-    const video2 = document.getElementById('jyd-video2');
-    const $teacherVoice = $("#jyd-teacherVoice")
+    const video2 = getScreenVideo();
+    const teacherVoice = document.getElementById("jyd-teacherVoice");
 
     let clickCount = 0; // 初始化计数器
 
@@ -48,26 +49,38 @@ const SAVE_INTERVAL_SECONDS = 10; // 实时保存进度的间隔时间（秒）
             if (button) button.click();
         }
         // ============ 1,2 键控制教师/课件视频显示 ===========
-        else if (event.code === 'Digit1') {
-            dbClick('#jyd-video1');
+        else if (event.code === 'Digit1' || event.code === 'Numpad1') { // 支持主键盘和小键盘的1
+            dbClick(video1);
         }
-        else if (event.code === 'Digit2') {
-            dbClick('#jyd-video2');
-            if ($teacherVoice.length) $teacherVoice.click();
+        else if (event.code === 'Digit2' || event.code === 'Numpad2') { // 支持主键盘和小键盘的2
+            dbClick(video2);
+            if (teacherVoice) teacherVoice.click();
+        }        // ============ 左键/H键后退 =================
+        // TODO 两个视频同步
+        else if (event.code === 'ArrowLeft' || event.code === 'KeyH') {
+            skipVideo(video1, -1);
+            skipVideo(video2, -1);
+        }
+        // ============ 右键/L键前进 =================
+        else if (event.code === 'ArrowRight' || event.code === 'KeyL') {
+            skipVideo(video1, 1);
+            skipVideo(video2, 1);
         }
     });
-
     // ================= 进度储存 =================
     videoProgressStorage(video1);
     videoProgressStorage(video2);
 }());
 
-function dbClick(selector) {
-    let element = document.querySelector(selector);
-    if (!element) {
-        console.error(`找不到元素: ${selector}`);
-        return;
-    }
+function getScreenVideo() {
+    const params = new URLSearchParams(location.search);
+    const type = params.get('publicRpType');
+    if (type && type.split(',').includes('1')) return document.getElementById('jyd-video3');
+    return document.getElementById('jyd-video2');
+}
+
+function dbClick(element) {
+    if (!element) return;
     // 双击事件
     const event = new MouseEvent('dblclick', {
         bubbles: true,
@@ -90,6 +103,13 @@ function saveProgress(progress) {
     GM_setValue(getKey(), progress);
 }
 
+function skipVideo(video, mode = -1) {
+    // mode 只能是 -1 或 1
+    if (!video) return;
+    const newTime = video.currentTime + mode * SKIP_SECONDS // 经测试无需担心数值溢出
+    video.currentTime = newTime;
+}
+
 function videoProgressStorage(video) {
     if (!video) return;
     let lastSaved = 0;
@@ -100,7 +120,7 @@ function videoProgressStorage(video) {
     video.addEventListener('loadedmetadata', () => {
         setTimeout(() => {
             if (savedProgress > 0) recoverProgress(video, savedProgress);
-        }, 500);
+        }, 1000); // 1s 延迟，以防万一
     });
 
     // ============ 间隔一段时间保存进度 =================
