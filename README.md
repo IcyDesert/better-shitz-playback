@@ -1,5 +1,5 @@
 # better-shitz-playback
-hitsz 回放平台大整改
+hitsz 课程回放平台大整改
 
 ## 支持功能
 *以下功能在 Windows11, Chrome/Microsoft Edge 浏览器下测试通过*
