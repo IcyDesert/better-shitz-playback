@@ -17,12 +17,13 @@ const SKIP_SECONDS = 6; // 快进/快退的秒数
 (function () {
     'use strict';
     const $controlBar = $('.jyd-videoControlBar');
-    const videoPlayer = document.getElementById('jyd-videoPlayer')
+    const fullscreenButton = document.getElementById('jyd-fullScreen');
+    const exitButton = document.getElementById('jyd-exitFullScreen');
     const video1 = document.getElementById('jyd-video1');
     const video2 = getScreenVideo();
     const teacherVoice = document.getElementById("jyd-teacherVoice");
 
-    // let clickCount = 0; // 初始化计数器
+    let clickCount = 0; // 初始化计数器
 
     // =========== 鼠标移动时显示进度条（是的，原本没有） =============
     $(document).on('mousemove', function () {
@@ -43,7 +44,10 @@ const SKIP_SECONDS = 6; // 快进/快退的秒数
         }
         // ============== F键控制全屏与否 =================
         else if (event.code === 'KeyF') {
-            toggleFullscreen(videoPlayer)
+            clickCount++;
+            const button = (clickCount % 2 === 1) ? fullscreenButton : exitButton;
+            if (button) button.click();
+
         }
         // ============ 1,2 键控制教师/课件视频显示 ===========
         else if (event.code === 'Digit1' || event.code === 'Numpad1') { // 支持主键盘和小键盘的1
