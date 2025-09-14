@@ -1,5 +1,5 @@
 <h1>
-HITSZ 课程回放平台大整改
+<p>HITSZ 课程回放平台大整改</p>
 
 <img src="https://img.shields.io/github/license/IcyDesert/better-shitz-playback">
 <img src="https://img.shields.io/github/v/tag/IcyDesert/better-shitz-playback">
