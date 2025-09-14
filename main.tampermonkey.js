@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         回放平台大整改
 // @namespace    http://tampermonkey.net/
-// @version      0.3.0
-// @description  try to take over the world!
+// @version      0.4.0
+// @description  让回放界面更好用
 // @author       IcyDesert
 // @match        http://219.223.238.14:88/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
 // @match        https://219-223-238-14-88-p.hitsz.edu.cn/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
@@ -17,13 +17,12 @@ const SKIP_SECONDS = 6; // 快进/快退的秒数
 (function () {
     'use strict';
     const $controlBar = $('.jyd-videoControlBar');
-    const fullScreenButton = document.getElementById('jyd-fullScreen');
-    const exitButton = document.getElementById('jyd-exitFullScreen');
+    const videoPlayer = document.getElementById('jyd-videoPlayer')
     const video1 = document.getElementById('jyd-video1');
     const video2 = getScreenVideo();
     const teacherVoice = document.getElementById("jyd-teacherVoice");
 
-    let clickCount = 0; // 初始化计数器
+    // let clickCount = 0; // 初始化计数器
 
     // =========== 鼠标移动时显示进度条（是的，原本没有） =============
     $(document).on('mousemove', function () {
@@ -44,18 +43,17 @@ const SKIP_SECONDS = 6; // 快进/快退的秒数
         }
         // ============== F键控制全屏与否 =================
         else if (event.code === 'KeyF') {
-            clickCount++;
-            const button = (clickCount % 2 === 1) ? fullScreenButton : exitButton;
-            if (button) button.click();
+            toggleFullscreen(videoPlayer)
         }
         // ============ 1,2 键控制教师/课件视频显示 ===========
         else if (event.code === 'Digit1' || event.code === 'Numpad1') { // 支持主键盘和小键盘的1
-            dbClick(video1);
+            toggleFullscreen(video1)
         }
         else if (event.code === 'Digit2' || event.code === 'Numpad2') { // 支持主键盘和小键盘的2
-            dbClick(video2);
+            toggleFullscreen(video2)
             if (teacherVoice) teacherVoice.click();
-        }        // ============ 左键/H键后退 =================
+        }        
+        // ============ 左键/H键后退 =================
         // TODO 两个视频同步
         else if (event.code === 'ArrowLeft' || event.code === 'KeyH') {
             skipVideo(video1, -1);
@@ -108,6 +106,16 @@ function skipVideo(video, mode = -1) {
     if (!video) return;
     const newTime = video.currentTime + mode * SKIP_SECONDS // 经测试无需担心数值溢出
     video.currentTime = newTime;
+}
+
+function toggleFullscreen(element) {
+    if (document.fullscreenElement === element) {
+        document.exitFullscreen()
+        return
+    }
+    element.requestFullscreen().catch( (err) => {
+        console.error(`Error enabling fullscreen: ${err.message}`);
+    });
 }
 
 function videoProgressStorage(video) {
