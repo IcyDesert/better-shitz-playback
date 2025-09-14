@@ -3,8 +3,7 @@
 
 <img src="https://img.shields.io/github/license/IcyDesert/better-shitz-playback">
 <img src="https://img.shields.io/github/v/tag/IcyDesert/better-shitz-playback">
-<img src="https://img.shields.io/github/last-commit/IcyDesert/better-shitz-playback
-">
+<img src="https://img.shields.io/github/last-commit/IcyDesert/better-shitz-playback">
 <img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/IcyDesert/better-shitz-playback">
 
 </h1>
