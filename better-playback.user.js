@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         回放平台大整改
 // @namespace    http://tampermonkey.net/
-// @version      0.4.0
-// @description  让回放界面更好用
+// @version      0.4.1
+// @description  让回放界面播放器更顺手
 // @author       IcyDesert
-// @match        http://219.223.238.14:88/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
-// @match        https://219-223-238-14-88-p.hitsz.edu.cn/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
+// @match        https://jxypt.hitsz.edu.cn/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
+// @match        https://jxypt-hitsz-edu-cn-s.hitsz.edu.cn/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=238.14
 // @grant        GM_getValue
 // @grant        GM_setValue

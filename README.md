@@ -34,8 +34,7 @@
 点击 <a href="https://gist.github.com/IcyDesert/fcbd3d82f12ab94f257ba8107679dd38/raw/ba9f299951dbf8fc9f71d36c454bcd6b7a56fd03/better-playback.user.js">链接</a> 进行安装
 
 #### 手动导入
-搜索 `油猴导入自定义脚本`，按照教程，将`main.tampermonkey.js`中的内容复制粘贴即可。
-
+搜索 `油猴导入自定义脚本`，按照教程，将`better-playback.user.js`中的内容复制粘贴即可。
 
 ### 可配置参数
 ```js
