@@ -7,6 +7,8 @@
 // @match        https://jxypt.hitsz.edu.cn/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
 // @match        https://jxypt-hitsz-edu-cn-s.hitsz.edu.cn/ve/back/rp/common/rpIndex.shtml?method=studyCourseDeatil*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=238.14
+// @downloadURL  https://raw.githubusercontent.com/IcyDesert/better-shitz-playback/main/better-playback.user.js
+// @updateURL    https://raw.githubusercontent.com/IcyDesert/better-shitz-playback/main/better-playback.user.js
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
