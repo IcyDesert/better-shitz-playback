@@ -41,9 +41,18 @@
 ### 可配置参数
 ```js
 // 需在油猴代码中修改
-const SAVE_INTERVAL_SECONDS = 10; // 实时保存进度的间隔时间（秒）
+const SAVE_INTERVAL_SECONDS = 10; // 定时保存进度的间隔时间（秒）
 const SKIP_SECONDS = 6; // 一次快进/快退的秒数
 ```
 
 ### 注意事项
+
+#### 为什么脚本一个功能都用不了，所有按键都没反应？
+
+> 感谢 @[specailweek](https://github.com/specailweek) 指出
+
+如果这是你第一次使用油猴，这是预期现象；参考油猴官方的 [FAQ-需要允许执行用户脚本](https://www.tampermonkey.net/faq.php#Q209) 进行操作。
+
+#### 操作导致界面不正常了，可以怎么做？
+
 由于脚本和播放器的交互比较灵车，因此有可能出现视频界面不正常情况。**但 `ESC 键` 始终是万能的！可以恢复到正常的样子**。

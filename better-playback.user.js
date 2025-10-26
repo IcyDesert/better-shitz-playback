@@ -13,7 +13,7 @@
 // @grant        GM_setValue
 // ==/UserScript==
 
-const SAVE_INTERVAL_SECONDS = 10; // 实时保存进度的间隔时间（秒）
+const SAVE_INTERVAL_SECONDS = 10; // 定时保存进度的间隔时间（秒）
 const SKIP_SECONDS = 6; // 快进/快退的秒数
 
 (function () {
